@@ -119,6 +119,7 @@ private CardLayout card;
 		
 		this.dispose();
 	}
+	
 	private void onFavoriteButtonClick() {
 		FavoriteView favoriteView = new FavoriteView();
 		favoriteView.setVisible(true);

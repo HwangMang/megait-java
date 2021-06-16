@@ -1,4 +1,5 @@
 ```java
+
 import java.sql.Connection;
 import java.sql.DriverManager;
 import java.sql.PreparedStatement;
@@ -37,10 +38,40 @@ public class CommonDao {
 	private static final String USERNAME = "root";
 	private static final String PASSWORD = "1234";
 
-	private Connection conn;
-	private ResultSet rs;
-	private PreparedStatement ps;
+	private Connection conn = null;
+	private ResultSet rs = null;
+	private PreparedStatement ps =null;
 
+	public CommonDto findById(String id) {
+		String sql = "SELECT * FROM common WHERE id = ?";
+		CommonDto dto = null;
+		try {
+			conn = getConnection();
+			ps = conn.prepareStatement(sql);
+			ps.setString(1, id);
+			rs = ps.executeQuery();
+
+			if (rs.next()) {
+				dto = new CommonDto();
+				dto.setNo(rs.getInt(1));
+				dto.setName(rs.getString(2));
+				dto.setId(rs.getString(3));
+				dto.setPassword(rs.getString(4));
+				dto.setPhoneNumber(rs.getString(5));
+				dto.setZip(rs.getString(6));
+				dto.setAdress(rs.getString(7));
+				dto.setAdress_detail(rs.getString(8));
+				dto.setType(rs.getInt(9));
+
+			}
+		} catch (SQLException e) {
+			e.printStackTrace();
+		} finally {
+			close(conn, ps, rs);
+		}
+		return dto;
+	}
+	
 	public CommonDto findByNo(int no) {
 		String sql = "SELECT * FROM common WHERE no = ?";
 		CommonDto dto = null;
@@ -101,22 +132,6 @@ public class CommonDao {
 		return no;
 	}
 
-	public int delete(int no) {
-		String sql = "DELETE FROM common WHERE no = ?";
-		int deletedRow = 0;
-		try {
-			conn = getConnection();
-			ps = conn.prepareStatement(sql);
-			ps.setInt(1, no);
-			deletedRow = ps.executeUpdate();
-		} catch (Exception e) {
-			e.printStackTrace();
-		} finally {
-			close(conn, ps);
-		}
-		return deletedRow;
-	}
-
 	List<CommonDto> findAll() {
 		String sql = "SELECT * FROM common";
 		List<CommonDto> list = new ArrayList<>();
@@ -150,18 +165,21 @@ public class CommonDao {
 
 	public int update(CommonDto dto) {
 
-		String sql = "UPDATE common SET name=?, id=?, password=?, phone=?, zip=?, adress=?, adress_detail=?, type=?  WHERE no = ?";
+		String sql = "UPDATE common SET no=?, name=?, id=?, password=?, phone=?, zip=?, adress=?, adress_detail=?. type=? WHERE id = ?";
 		int updatedRow = -1;
 		try {
-			conn = getConnection();
-			ps.setString(1, dto.getName());
-			ps.setString(2, dto.getId());
-			ps.setString(3, dto.getPassword());
-			ps.setString(4, dto.getPhoneNumber());
-			ps.setString(5, dto.getZip());
-			ps.setString(6, dto.getAdress());
-			ps.setString(7, dto.getAdress_detail());
-			ps.setInt(8, dto.getType());
+			conn =DatabaseUtil.getConnection();
+			ps = conn.prepareStatement(sql);
+			ps.setInt(1, dto.getNo());
+			ps.setString(2, dto.getName());
+			ps.setString(3, dto.getId());
+			ps.setString(4, dto.getPassword());
+			ps.setString(5, dto.getPhoneNumber());
+			ps.setString(6, dto.getZip());
+			ps.setString(7, dto.getAdress());
+			ps.setString(8, dto.getAdress_detail());
+			ps.setInt(9, dto.getType());
+
 			updatedRow = ps.executeUpdate();
 		} catch (SQLException e) {
 			e.printStackTrace();
@@ -198,11 +216,11 @@ public class CommonDao {
 	public int loginCheck(String userID, String userPassword) {
 		try {
 			conn = DatabaseUtil.getConnection();
-			ps = conn.prepareStatement("SELECT * FROM tomcat WHERE userid = ?");
-			ps.setString(2, userID);
+			ps = conn.prepareStatement("SELECT * FROM COMMON WHERE id = ?");
+			ps.setString(1, userID);
 			rs = ps.executeQuery();
 			if (rs.next()) {
-				if (rs.getString(3).contentEquals(userPassword)) {
+				if (rs.getString("password").contentEquals(userPassword)) {
 					return 1; // 로그인 성공
 				}
 				else {
@@ -218,6 +236,38 @@ public class CommonDao {
 
 	}
 
+	public int delete(String id) {
+		String sql = "DELETE FROM common WHERE id = ?";
+		int deletedRow = 0;
+		try {
+			conn = getConnection();
+			ps = conn.prepareStatement(sql);
+			ps.setString(1, id);
+			deletedRow = ps.executeUpdate();
+		} catch (Exception e) {
+			e.printStackTrace();
+		} finally {
+			close(conn, ps);
+		}
+		return deletedRow;
+	}
+
+	
+
+	public static void main(String[] args) {
+//		CommonDao dao = CommonDao.getInstance();
+//		CommonDto dto = new CommonDto();
+//		dto.setName("김김김");
+//		dto.setId("kimkimkim");
+//		dto.setPassword("12df456");
+//		dto.setPhoneNumber("010-555-555");
+//		dto.setZip("우편번호");
+//		dto.setAdress("서울 특별시");
+//		dto.setAdress_detail("무슨무슨 아파트");
+//		dto.setType(0);
+//		dao.insert(dto);
+
+	}
 
 }
 ```
